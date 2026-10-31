@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFF6E3" />
+  <title>词不一样就跑步 · 本地版 — 双人联想聚会小游戏</title>
+  <meta name="description" content="各想一个词，同时揭晓；没撞上，就换个思路再想一轮。同一 WiFi 内联机，零延迟，不用出门跑真步。灵感卡 × 表情弹幕 × 主题挑战 × 默契值成就。" />
+  <meta property="og:title" content="词不一样就跑步 · 本地版" />
+  <meta property="og:description" content="双人联想聚会小游戏：各想一个词，同时揭晓，看你们的脑回路会不会相遇。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ro34.github.io/wordmeld/" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='54' r='38' fill='%23FFD24C'/%3E%3Cpath d='M46 18c-2-9 5-13 9-6' stroke='%23F5A623' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='38' cy='48' r='4' fill='%233A2E1F'/%3E%3Ccircle cx='62' cy='48' r='4' fill='%233A2E1F'/%3E%3Cpath d='M44 60l6 5 6-5z' fill='%23FF9838'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 吉祥物 SVG 原型（与游戏内 public/app.js 同一版手绘） -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="mascot-chick" viewBox="0 0 120 120">
+        <ellipse cx="60" cy="107" rx="26" ry="5" fill="rgba(87,63,24,.10)"/>
+        <path d="M49 95v7m-7 0h14M71 95v7m-7 0h14" stroke="#EDAE1B" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+        <ellipse cx="60" cy="63" rx="37" ry="35" fill="#FFD24C"/>
+        <ellipse cx="60" cy="78" rx="26" ry="16" fill="rgba(87,63,24,.06)"/>
+        <path d="M51 27c-3-9 4-14 8-7M62 25c1-9 10-9 11-1" stroke="#EDAE1B" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+        <ellipse cx="31" cy="66" rx="10" ry="15" fill="#FFC93C" transform="rotate(14 31 66)"/>
+        <circle cx="47" cy="55" r="4.2" fill="#3A2E1F"/>
+        <circle cx="48.5" cy="53.6" r="1.4" fill="#fff"/>
+        <circle cx="73" cy="55" r="4.2" fill="#3A2E1F"/>
+        <circle cx="74.5" cy="53.6" r="1.4" fill="#fff"/>
+        <ellipse cx="40" cy="65" rx="5.2" ry="3.4" fill="#FFB09A" opacity=".85"/>
+        <ellipse cx="80" cy="65" rx="5.2" ry="3.4" fill="#FFB09A" opacity=".85"/>
+        <path d="M53.5 62h13l-6.5 8z" fill="#FF9838"/>
+      </symbol>
+      <symbol id="mascot-duck" viewBox="0 0 120 120">
+        <ellipse cx="60" cy="107" rx="26" ry="5" fill="rgba(87,63,24,.10)"/>
+        <path d="M49 95v7m-7 0h14M71 95v7m-7 0h14" stroke="#F0A24A" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+        <ellipse cx="60" cy="63" rx="37" ry="35" fill="#FFFDF4" stroke="#EFE2C4" stroke-width="2"/>
+        <ellipse cx="60" cy="78" rx="26" ry="16" fill="rgba(87,63,24,.05)"/>
+        <path d="M60 26c-1-8 5-11 9-6" stroke="#5FBF92" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+        <ellipse cx="31" cy="66" rx="10" ry="15" fill="#CDEEDD" transform="rotate(14 31 66)"/>
+        <circle cx="47" cy="54" r="4.2" fill="#3A2E1F"/>
+        <circle cx="48.5" cy="52.6" r="1.4" fill="#fff"/>
+        <circle cx="73" cy="54" r="4.2" fill="#3A2E1F"/>
+        <circle cx="74.5" cy="52.6" r="1.4" fill="#fff"/>
+        <ellipse cx="40" cy="63" rx="5.2" ry="3.4" fill="#FFC4B8" opacity=".9"/>
+        <ellipse cx="80" cy="63" rx="5.2" ry="3.4" fill="#FFC4B8" opacity=".9"/>
+        <path d="M49 61.5h22c2.4 0 3.4 2.3 1.7 4-3 3-6.8 4.5-12.7 4.5s-9.7-1.5-12.7-4.5c-1.7-1.7-.7-4 1.7-4z" fill="#FFA94D"/>
+        <path d="M53 65.5h14" stroke="#E8862F" stroke-width="2" stroke-linecap="round"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- 背景黏土光斑（与游戏同款） -->
+  <div class="bg-decor" aria-hidden="true">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+  </div>
+
+  <!-- 小鸡跑步滚动进度条 -->
+  <div class="progress-track" aria-hidden="true">
+    <div class="progress-fill" id="progressFill"></div>
+    <div class="progress-chick" id="progressChick">
+      <svg class="mascot" viewBox="0 0 120 120"><use href="#mascot-chick"/></svg>
+    </div>
+  </div>
+
+  <!-- 顶部导航 -->
+  <header class="nav">
+    <a class="nav-brand" href="#top">
+      <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true"><use href="#mascot-chick"/></svg>
+      <span>词不一样就跑步</span>
+    </a>
+    <nav class="nav-links" aria-label="页面导航">
+      <a href="#how">怎么玩</a>
+      <a href="#features">为什么好玩</a>
+      <a href="#achievements">成就</a>
+      <a href="#start">开一局</a>
+    </nav>
+    <a class="btn btn-ghost btn-sm" href="https://github.com/Ro34/wordmeld" target="_blank" rel="noopener">
+      ⭐ GitHub
+    </a>
+  </header>
+
+  <main id="top">
+    <!-- ======================= HERO ======================= -->
+    <section class="hero">
+      <div class="hero-badge reveal">🎉 v1.1 上新 · 灵感卡 + 表情弹幕 + 主题挑战 + 默契值成就</div>
+      <h1 class="hero-title reveal">词不一样<span class="accent">就跑步</span></h1>
+      <p class="hero-sub reveal">
+        各想一个词，同时揭晓；没撞上，就换个思路再想一轮。<br class="br-desktop" />
+        同一 WiFi 内联机，零延迟，不用出门跑真步 🏃
+      </p>
+      <div class="hero-ctas reveal">
+        <a class="btn btn-primary btn-lg" href="#start">🏃 30 秒开一局</a>
+        <a class="btn btn-ghost btn-lg" href="https://github.com/Ro34/wordmeld" target="_blank" rel="noopener">⭐ 看看源码</a>
+      </div>
+
+      <div class="hero-scene reveal" aria-hidden="true">
+        <div class="hero-mascot hero-mascot-a">
+          <div class="bubble bubble-left">我先想到一个词！</div>
+          <svg class="mascot" viewBox="0 0 120 120"><use href="#mascot-chick"/></svg>
+          <span class="hero-name hero-name-a">小黄鸡</span>
+        </div>
+        <div class="hero-vs">VS</div>
+        <div class="hero-mascot hero-mascot-b">
+          <div class="bubble bubble-right">嘿嘿，不告诉你～</div>
+          <svg class="mascot" viewBox="0 0 120 120"><use href="#mascot-duck"/></svg>
+          <span class="hero-name hero-name-b">小白鸭</span>
+        </div>
+      </div>
+
+      <ul class="hero-stats reveal" role="list">
+        <li><strong data-count="2">0</strong><span>人同屏</span></li>
+        <li><strong data-count="10">0</strong><span>组主题</span></li>
+        <li><strong data-count="12">0</strong><span>组灵感卡</span></li>
+        <li><strong data-count="8">0</strong><span>枚成就</span></li>
+      </ul>
+    </section>
+
+    <!-- ======================= 怎么玩 ======================= -->
+    <section class="section" id="how">
+      <header class="section-head reveal">
+        <span class="kicker">怎么玩</span>
+        <h2>四步，跑到同一个词上</h2>
+        <p class="section-sub">从创建房间到脑回路相遇，最快 30 秒</p>
+      </header>
+
+      <ol class="steps" role="list">
+        <li class="step-card card reveal">
+          <span class="step-num">1</span>
+          <h3>🖥️ 创建房间</h3>
+          <p>一台电脑跑 <code>npm start</code> 当主机，自动生成 4 位房间码——I L O 0 1 这些容易看错的字母都剔掉了。</p>
+        </li>
+        <li class="step-card card reveal">
+          <span class="step-num">2</span>
+          <h3>📱 扫码加入</h3>
+          <p>对方连同一 WiFi，扫码、点邀请链接或手动输码都行。座位亮起来，人齐自动开局。</p>
+        </li>
+        <li class="step-card card reveal">
+          <span class="step-num">3</span>
+          <h3>✍️ 同时写词</h3>
+          <p>30 / 60 / 自定义秒，倒计时以服务器为准。写好就锁定，揭晓前谁也看不到谁的。</p>
+        </li>
+        <li class="step-card card reveal">
+          <span class="step-num">4</span>
+          <h3>🔀 同时揭晓</h3>
+          <p>词一样，直接通关！不一样，就从这两个词之间继续联想，直到你们的脑回路相遇。</p>
+        </li>
+      </ol>
+
+      <!-- 揭晓动画演示 -->
+      <div class="demo-wrap reveal">
+        <div class="demo-stage card" id="demo" aria-label="游戏流程自动演示">
+          <div class="demo-head">
+            <span class="demo-round" id="demoRound">第 1 轮</span>
+            <span class="demo-theme">🎯 主题 · 🍜 食物</span>
+          </div>
+          <div class="demo-timer"><i id="demoTimerFill"></i></div>
+          <div class="demo-players">
+            <div class="demo-player">
+              <svg class="mascot mascot-sm" viewBox="0 0 120 120"><use href="#mascot-chick"/></svg>
+              <div class="demo-input demo-input-a" id="demoInputA"><span class="demo-word" id="demoWordA"></span></div>
+              <span class="demo-name">小黄鸡</span>
+            </div>
+            <div class="demo-x" aria-hidden="true">×</div>
+            <div class="demo-player">
+              <svg class="mascot mascot-sm" viewBox="0 0 120 120"><use href="#mascot-duck"/></svg>
+              <div class="demo-input demo-input-b" id="demoInputB"><span class="demo-word" id="demoWordB"></span></div>
+              <span class="demo-name">小白鸭</span>
+            </div>
+          </div>
+          <div class="demo-banner" id="demoBanner" role="status">还差一点！从这两个词之间，寻找下一步联想</div>
+          <div class="demo-success" id="demoSuccess">
+            <div class="demo-success-title">你们的脑回路相遇了</div>
+            <div class="demo-success-sub" id="demoSuccessSub">第 2 轮 · 同词成功</div>
+            <div class="demo-value">✨ 默契值 +<b id="demoValue">0</b></div>
+          </div>
+        </div>
+        <p class="demo-caption">自动演示 · 灵感来自每一局真实对决</p>
+      </div>
+    </section>
+
+    <!-- ======================= 为什么好玩 ======================= -->
+    <section class="section" id="features">
+      <header class="section-head reveal">
+        <span class="kicker">为什么好玩</span>
+        <h2>卡住有人救，赢了有排面</h2>
+        <p class="section-sub">灵感卡、表情弹幕、主题挑战——都是为了让你们更快撞上同一个词</p>
+      </header>
+
+      <div class="bento">
+        <!-- 表情弹幕（可互动） -->
+        <article class="bento-card card bento-danmaku reveal">
+          <div class="bento-icon">💥</div>
+          <h3>表情弹幕</h3>
+          <p>等对方交卷时发个 emoji，从两个人屏幕底部一起飞过。下面这排是真的能点：</p>
+          <div class="danmaku-stage" id="danmakuStage" aria-hidden="true"></div>
+          <div class="danmaku-btns" role="group" aria-label="点一下发个弹幕">
+            <button type="button" class="danmaku-btn" data-emoji="👍">👍</button>
+            <button type="button" class="danmaku-btn" data-emoji="😂">😂</button>
+            <button type="button" class="danmaku-btn" data-emoji="❤️">❤️</button>
+            <button type="button" class="danmaku-btn" data-emoji="🔥">🔥</button>
+            <button type="button" class="danmaku-btn" data-emoji="😭">😭</button>
+          </div>
+        </article>
+
+        <!-- 灵感卡 -->
+        <article class="bento-card card reveal">
+          <div class="bento-icon">🃏</div>
+          <h3>灵感卡</h3>
+          <p>12 组离线牌堆当「想不出来时的脚手架」，抽到哪个词点一下就填进输入框。</p>
+          <div class="mini-deck" aria-hidden="true">
+            <div class="mini-card mini-card-back">🃏</div>
+            <div class="mini-card">
+              <b>🍉 水果摊</b>
+              <span>西瓜 · 榴莲 · 车厘子</span>
+              <em>换一张 🔀</em>
+            </div>
+          </div>
+          <p class="bento-note">抽卡后 2 轮内同词，还藏着一枚隐藏成就</p>
+        </article>
+
+        <!-- 主题挑战 -->
+        <article class="bento-card card reveal">
+          <div class="bento-icon">🎯</div>
+          <h3>主题挑战</h3>
+          <p>开局随机发一张主题牌，围着它联想，再玩一局自动换新题。</p>
+          <div class="mini-themes" aria-hidden="true">
+            <span>🍜 食物</span><span>🐾 动物</span><span>🏫 校园</span>
+            <span>🎬 影视</span><span>🧳 旅行</span><span>⛅ 天气</span>
+          </div>
+        </article>
+
+        <!-- 默契值 -->
+        <article class="bento-card card reveal">
+          <div class="bento-icon">✨</div>
+          <h3>默契值</h3>
+          <p>越快同词分越高：第 1 轮同词 <b>+20</b>，越拖越少；「同一个东西」再 <b>+5</b>。战绩本地保存。</p>
+          <div class="value-chip" id="valueChip">✨ 默契值 <b>+<span data-count="20">0</span></b></div>
+        </article>
+
+        <!-- 同一个东西 -->
+        <article class="bento-card card reveal">
+          <div class="bento-icon">🤝</div>
+          <h3>同一个东西</h3>
+          <p>番茄 = 西红柿？表达不同没关系，双方都点头就算通关。</p>
+          <div class="same-chips" aria-hidden="true">
+            <span class="same-chip same-chip-a">番茄</span>
+            <span class="same-chip-mid">= 🤝 =</span>
+            <span class="same-chip same-chip-b">西红柿</span>
+          </div>
+        </article>
+
+        <!-- 记录照片（通栏横排） -->
+        <article class="bento-card card bento-photo reveal">
+          <div class="bento-photo-main">
+            <div class="bento-icon">📸</div>
+            <h3>记录照片</h3>
+            <p>通关自动生成记录照：双吉祥物、联想轨迹、房间号、日期，存下来发群里。</p>
+          </div>
+          <div class="mini-photo" aria-hidden="true">
+            <div class="mini-photo-mascots">
+              <svg class="mascot" viewBox="0 0 120 120"><use href="#mascot-chick"/></svg>
+              <span>💛</span>
+              <svg class="mascot" viewBox="0 0 120 120"><use href="#mascot-duck"/></svg>
+            </div>
+            <div class="mini-photo-trace">
+              <span>火锅 × 麻辣烫</span>
+              <span>火锅 × 火锅 ✓</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ======================= 主题跑马灯 ======================= -->
+    <section class="marquee-zone" aria-label="主题与灵感卡牌堆一览">
+      <div class="marquee" data-marquee="themes">
+        <div class="marquee-track" id="marqueeThemes"></div>
+      </div>
+      <div class="marquee marquee-reverse" data-marquee="decks">
+        <div class="marquee-track" id="marqueeDecks"></div>
+      </div>
+    </section>
+
+    <!-- ======================= 成就墙 ======================= -->
+    <section class="section" id="achievements">
+      <header class="section-head reveal">
+        <span class="kicker">默契档案</span>
+        <h2>8 枚成就，见证你们的脑回路</h2>
+        <p class="section-sub">战绩存在自己设备上，越玩越有排面</p>
+      </header>
+      <ul class="ach-grid" role="list" id="achGrid"></ul>
+      <p class="ach-hint reveal">🃏 还有一枚隐藏成就，藏在灵感卡里……</p>
+    </section>
+
+    <!-- ======================= 开始 ======================= -->
+    <section class="section" id="start">
+      <header class="section-head reveal">
+        <span class="kicker">开始</span>
+        <h2>30 秒，开一局</h2>
+        <p class="section-sub">需要 Node.js 18+；一台电脑当主机，所有手机连同一个 WiFi</p>
+      </header>
+
+      <div class="start-grid">
+        <div class="terminal card reveal" aria-label="启动命令">
+          <div class="terminal-bar"><i></i><i></i><i></i><span>局域网 · 终端</span></div>
+          <pre><code><span class="t-cmd">git clone</span> https://github.com/Ro34/wordmeld.git
+<span class="t-cmd">cd</span> wordmeld <span class="t-op">&&</span> <span class="t-cmd">npm install</span>
+<span class="t-cmd">npm start</span>
+
+<span class="t-out">🐤 词不一样就跑步 · 本地版已启动</span>
+<span class="t-out">📱 手机扫码（同一 WiFi）</span>
+<span class="t-out">   http://192.168.1.3:3000  ▌████████</span></code></pre>
+        </div>
+
+        <ul class="join-ways" role="list">
+          <li class="join-card card reveal">
+            <span class="join-icon">📷</span>
+            <div><b>扫码加入</b><p>启动就出二维码，手机相机对一下就好</p></div>
+          </li>
+          <li class="join-card card reveal">
+            <span class="join-icon">🔗</span>
+            <div><b>邀请链接</b><p>带房间码的链接一键复制，发到群里点开即玩</p></div>
+          </li>
+          <li class="join-card card reveal">
+            <span class="join-icon">⌨️</span>
+            <div><b>手动输码</b><p>4 位房间码，没有容易看错的字符</p></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="start-cta reveal">
+        <a class="btn btn-primary btn-lg" href="https://github.com/Ro34/wordmeld" target="_blank" rel="noopener">
+          ⭐ 去 GitHub 下载开玩
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- 全屏彩带 -->
+  <div class="confetti-wrap" id="confettiWrap" aria-hidden="true"></div>
+
+  <footer class="footer">
+    <p class="footer-brand">
+      <svg class="mascot mascot-sm" viewBox="0 0 120 120" aria-hidden="true"><use href="#mascot-chick"/></svg>
+      词不一样就跑步 · 本地版
+    </p>
+    <p class="footer-line">致敬莎莉鸡的精神，但造型是我们自己的 · 双吉祥物 © 本项目原创</p>
+    <p class="footer-line">
+      <a href="https://github.com/Ro34/wordmeld" target="_blank" rel="noopener">GitHub · Ro34/wordmeld</a>
+      · Made with 💛 · v1.1
+    </p>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
