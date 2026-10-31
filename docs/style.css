@@ -191,19 +191,64 @@ a { color: inherit; }
   font-size: 13.5px; font-weight: 800; letter-spacing: 0.04em;
   padding: 9px 20px;
 }
-/* 开发者戳子：贴纸印章风 */
-.dev-stamp {
-  display: inline-flex; align-items: center; gap: 6px;
-  border: 2px solid #F08A76;
-  background: var(--coral-soft);
-  color: #A5463A;
-  border-radius: 12px;
-  padding: 7px 16px;
-  font-size: 13px; font-weight: 800; letter-spacing: 0.06em;
-  transform: rotate(-3deg);
-  box-shadow: 0 2px 0 rgba(224, 91, 75, 0.22);
+
+/* 吉祥物中间的小木牌：开发者署名，点击直达 GitHub */
+.hero-center {
+  display: flex; flex-direction: column; align-items: center;
+  align-self: flex-end;
+  gap: 12px;
 }
-.dev-stamp b { color: #8A3B30; font-weight: 900; }
+.hero-vs {
+  width: 58px; height: 58px;
+  display: grid; place-items: center;
+  background: linear-gradient(180deg, var(--chick-hi), var(--chick));
+  color: #5C4400; font-weight: 900; font-size: 19px;
+  border-radius: 50%;
+  box-shadow: 0 5px 0 var(--chick-press);
+}
+.dev-sign {
+  display: flex; flex-direction: column; align-items: center;
+  text-decoration: none;
+  transform: rotate(3deg);
+  transform-origin: 50% 0;
+}
+@keyframes sign-swing {
+  0%, 100% { transform: rotate(3deg); }
+  30% { transform: rotate(-4deg); }
+  60% { transform: rotate(6deg); }
+}
+.dev-sign:hover, .dev-sign:focus-visible { animation: sign-swing 0.8s ease; }
+.dev-sign-plank {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  background: linear-gradient(180deg, #FBEECB, #F3DFAE);
+  border: 2px solid #D9C08A;
+  border-radius: 10px;
+  padding: 7px 16px 8px;
+  box-shadow: 0 3px 0 rgba(138, 111, 63, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.8);
+}
+.dev-sign-plank small {
+  font-size: 10.5px; font-weight: 800; color: #8A6F3F;
+  letter-spacing: 0.1em;
+}
+.dev-sign-plank b {
+  font-size: 13.5px; font-weight: 900; color: #5C4400;
+  white-space: nowrap; line-height: 1.3;
+}
+.dev-sign-nail {
+  position: absolute; width: 5px; height: 5px; border-radius: 50%;
+  background: #B89A5E;
+  box-shadow: inset 0 1px 1px rgba(60, 45, 20, 0.45);
+}
+.dev-sign-nail:nth-of-type(1) { left: 5px; top: 50%; margin-top: -2.5px; }
+.dev-sign-nail:nth-of-type(2) { right: 5px; top: 50%; margin-top: -2.5px; }
+.dev-sign-post {
+  width: 9px; height: 24px;
+  background: linear-gradient(180deg, #E8D3A0, #D9BE85);
+  border: 2px solid #D9C08A; border-top: none;
+  border-radius: 0 0 5px 5px;
+  margin-top: -1px;
+}
 .hero-title {
   margin-top: 26px;
   font-size: clamp(46px, 9vw, 92px);
@@ -263,15 +308,6 @@ a { color: inherit; }
 .bubble-left { animation: float 3.6s ease-in-out -0.8s infinite alternate; }
 .bubble-right { animation: float 3.2s ease-in-out -2s infinite alternate; }
 
-.hero-vs {
-  width: 58px; height: 58px;
-  display: grid; place-items: center;
-  background: linear-gradient(180deg, var(--chick-hi), var(--chick));
-  color: #5C4400; font-weight: 900; font-size: 19px;
-  border-radius: 50%;
-  box-shadow: 0 5px 0 var(--chick-press);
-  margin-bottom: 30px;
-}
 @keyframes float {
   from { transform: translateY(0); }
   to   { transform: translateY(-12px); }
@@ -720,6 +756,12 @@ a { color: inherit; }
   .hero-ctas .btn { width: 100%; }
   .hero-scene { gap: 8px; }
   .bubble { font-size: 12px; padding: 7px 10px; }
+  .hero-vs { width: 44px; height: 44px; font-size: 14px; }
+  .hero-center { gap: 8px; }
+  .dev-sign-plank { padding: 5px 10px 6px; border-radius: 8px; }
+  .dev-sign-plank small { font-size: 9.5px; }
+  .dev-sign-plank b { font-size: 11.5px; }
+  .dev-sign-post { height: 14px; width: 7px; }
   .steps { grid-template-columns: 1fr; }
   .bento-card, .bento-danmaku, .bento-photo { grid-column: span 6; }
   .bento-photo { grid-template-columns: 1fr; gap: 16px; }
