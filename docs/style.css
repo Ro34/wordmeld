@@ -191,34 +191,19 @@ a { color: inherit; }
   font-size: 13.5px; font-weight: 800; letter-spacing: 0.04em;
   padding: 9px 20px;
 }
-
-/* 邮戳：盖在标题右上角的单色油墨戳，点击直达 GitHub */
-.hero-vs {
-  width: 58px; height: 58px;
-  display: grid; place-items: center;
-  background: linear-gradient(180deg, var(--chick-hi), var(--chick));
-  color: #5C4400; font-weight: 900; font-size: 19px;
-  border-radius: 50%;
-  box-shadow: 0 5px 0 var(--chick-press);
-  margin-bottom: 30px;
+/* 开发者戳子：贴纸印章风 */
+.dev-stamp {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 2px solid #F08A76;
+  background: var(--coral-soft);
+  color: #A5463A;
+  border-radius: 12px;
+  padding: 7px 16px;
+  font-size: 13px; font-weight: 800; letter-spacing: 0.06em;
+  transform: rotate(-3deg);
+  box-shadow: 0 2px 0 rgba(224, 91, 75, 0.22);
 }
-.accent-wrap { position: relative; display: inline-block; }
-.postmark {
-  position: absolute; top: -30px; right: -42px;
-  width: 114px; height: 114px;
-  color: #D6492F;
-  opacity: 0.88;
-  mix-blend-mode: multiply;
-  transform: rotate(-12deg);
-  transition: transform 0.25s ease, opacity 0.2s ease;
-  z-index: 2;
-}
-.postmark:hover, .postmark:focus-visible { transform: rotate(-5deg) scale(1.05); opacity: 0.95; }
-.postmark svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.postmark text { fill: currentColor; font-family: var(--font); }
-.postmark .pm-arc { font-size: 12px; font-weight: 800; letter-spacing: 2.5px; }
-.postmark .pm-arc-bottom-text { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; }
-.postmark .pm-date { font-size: 11.5px; font-weight: 900; letter-spacing: 1px; }
+.dev-stamp b { color: #8A3B30; font-weight: 900; }
 .hero-title {
   margin-top: 26px;
   font-size: clamp(46px, 9vw, 92px);
@@ -278,6 +263,15 @@ a { color: inherit; }
 .bubble-left { animation: float 3.6s ease-in-out -0.8s infinite alternate; }
 .bubble-right { animation: float 3.2s ease-in-out -2s infinite alternate; }
 
+.hero-vs {
+  width: 58px; height: 58px;
+  display: grid; place-items: center;
+  background: linear-gradient(180deg, var(--chick-hi), var(--chick));
+  color: #5C4400; font-weight: 900; font-size: 19px;
+  border-radius: 50%;
+  box-shadow: 0 5px 0 var(--chick-press);
+  margin-bottom: 30px;
+}
 @keyframes float {
   from { transform: translateY(0); }
   to   { transform: translateY(-12px); }
@@ -726,11 +720,6 @@ a { color: inherit; }
   .hero-ctas .btn { width: 100%; }
   .hero-scene { gap: 8px; }
   .bubble { font-size: 12px; padding: 7px 10px; }
-  .hero-vs { width: 44px; height: 44px; font-size: 14px; margin-bottom: 22px; }
-  .postmark { width: 86px; height: 86px; top: -20px; right: -26px; }
-  .postmark .pm-arc { font-size: 13.5px; letter-spacing: 1.5px; }
-  .postmark .pm-arc-bottom-text { font-size: 11.5px; letter-spacing: 0.8px; }
-  .postmark .pm-date { font-size: 12.5px; }
   .steps { grid-template-columns: 1fr; }
   .bento-card, .bento-danmaku, .bento-photo { grid-column: span 6; }
   .bento-photo { grid-template-columns: 1fr; gap: 16px; }
