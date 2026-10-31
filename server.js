@@ -22,6 +22,23 @@ const CLEANUP_DELAY = 5 * 60 * 1000; // 双人全断开后 5 分钟回收
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 去掉易混淆的 I L O 0 1
 const MASCOTS = ['chick', 'duck']; // 座位 0 = 小鸡, 座位 1 = 小鸭
 
+// 主题挑战牌堆（服务端随机发题，词仅作灵感示例，不强制校验）
+const THEMES = [
+  { name: '食物', icon: '🍜', words: ['火锅', '饺子', '奶茶'] },
+  { name: '动物', icon: '🐾', words: ['企鹅', '海豚', '仓鼠'] },
+  { name: '校园', icon: '🏫', words: ['早八', '食堂', '晚自习'] },
+  { name: '影视', icon: '🎬', words: ['周星驰', '科幻片', '动画片'] },
+  { name: '旅行', icon: '🧳', words: ['露营', '护照', '攻略'] },
+  { name: '居家', icon: '🏠', words: ['拖把', '外卖', '沙发'] },
+  { name: '运动', icon: '⚽', words: ['跳绳', '瑜伽', '看球'] },
+  { name: '音乐', icon: '🎵', words: ['演唱会', 'KTV', '耳机'] },
+  { name: '天气', icon: '⛅', words: ['台风', '桑拿天', '秋裤'] },
+  { name: '打工', icon: '💼', words: ['周报', '加班', '摸鱼'] },
+];
+
+// 表情弹幕白名单
+const REACT_EMOJIS = ['👍', '😂', '❤️', '🔥', '😭', '🎉'];
+
 function makeCode() {
   for (let i = 0; i < 50; i++) {
     let code = '';
@@ -39,14 +56,17 @@ function clampSeconds(s) {
   return Math.min(300, Math.max(10, Math.round(n)));
 }
 
-function createRoom(seconds) {
+function createRoom(seconds, themeMode) {
   const code = makeCode();
   if (!code) return null;
+  const theme = themeMode ? THEMES[crypto.randomInt(THEMES.length)] : null;
   const room = {
     code,
     phase: 'waiting',
     seconds: clampSeconds(seconds),
+    theme, // 主题挑战：{ name, icon, words } | null
     round: 0,
+    serial: 1, // 局序号：再玩一局时 +1，供客户端防重复结算
     deadline: 0,
     players: [null, null], // { token, socket, connected, submitted, word, choice }
     trail: [], // { round, words:[a,b], matched, sameMeaning }
@@ -81,7 +101,9 @@ function publicRoom(room) {
     phase: room.phase,
     seconds: room.seconds,
     round: room.round,
+    serial: room.serial,
     deadline: room.deadline,
+    theme: room.theme, // 主题挑战信息
     urls: LAN_URLS, // 局域网地址（生成二维码用，避免 localhost 编进去）
     players: room.players.map((p, i) => ({
       seat: i,
@@ -193,6 +215,8 @@ function playAgain(room) {
   }
   room.lastGame = room.trail.length ? room.trail : room.lastGame;
   room.trail = [];
+  room.serial += 1; // 新的一局
+  if (room.theme) room.theme = THEMES[crypto.randomInt(THEMES.length)]; // 再玩一局换新主题
   startRound(room, 1);
 }
 
@@ -273,7 +297,7 @@ function handleMessage(socket, msg) {
 
     case 'create': {
       if (room) return;
-      const newRoom = createRoom(msg.seconds);
+      const newRoom = createRoom(msg.seconds, !!msg.themeMode);
       if (!newRoom) {
         socket.safeSend({ t: 'error', message: '创建失败，请重试' });
         return;
@@ -324,6 +348,18 @@ function handleMessage(socket, msg) {
       if (!room || room.phase !== 'waiting') return;
       room.seconds = clampSeconds(msg.seconds);
       broadcast(room);
+      return;
+    }
+
+    case 'react': {
+      // 表情弹幕：轻量转发，不进状态机
+      if (!room || typeof msg.emoji !== 'string') return;
+      if (!REACT_EMOJIS.includes(msg.emoji)) return;
+      const idx = seatIndex(room, socket.token);
+      if (idx === -1) return;
+      for (const p of room.players) {
+        if (p && p.connected) p.socket.safeSend({ t: 'react', emoji: msg.emoji, from: idx });
+      }
       return;
     }
 
